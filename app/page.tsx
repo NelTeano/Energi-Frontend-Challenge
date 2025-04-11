@@ -1,6 +1,7 @@
 'use client'
-import React, { use, useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { useState } from 'react'
+import { toast } from "sonner"
 
 // COMPONENTS
 import {
@@ -17,9 +18,7 @@ import Loader from '@/components/Loader';
 // ICONS
 import { 
   ChevronLeft,
-  ChevronRight,
-  ArrowUp,
-  ArrowDown, 
+  ChevronRight, 
 } from "lucide-react";
 
 // UTILS
@@ -100,6 +99,11 @@ export default function Page() {
       }
     });
 
+    if(isNameAscending){
+      toast("Cryptocurrencies have been sorted in Ascending order.")
+    }else{
+      toast("Cryptocurrencies has been sorted by Descending order.")
+    }
     setData(sortedData);
     setIsNameAscending(!isNameAscending); // Toggle the sort order
   }, [data, isNameAscending]);
@@ -112,7 +116,12 @@ export default function Page() {
         return b.last_price - a.last_price; // Highest to lowest
       }
     });
-  
+
+    if(isPriceAscending){
+      toast("Cryptocurrencies price value has been sorted by lowest to highest.")
+    }else{
+      toast("Cryptocurrencies price value have been sorted by highest to lowest.")
+    }
     setData(sortedData);
     setIsPriceAscending(!isPriceAscending); // Toggle the sort order
   }, [data, isPriceAscending]);

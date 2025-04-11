@@ -1,10 +1,10 @@
 import Image from 'next/image';
-import { useState, useEffect, useMemo } from "react";
-import { ethers } from "ethers";
+import { useMemo } from "react";
 import CryptoIcon from '@/components/CryptoIcon';
 import { Separator } from "@/components/ui/separator";
 import { ExternalLink, Copy } from "lucide-react";
 
+import { toast, Toaster } from 'sonner';
 // IMG
 import EnergiIcon from '@/public/energiIcon.png';
 import MetaMaskLogo from '@/public/metamask-icon.png'
@@ -76,7 +76,13 @@ export const AccountBoard = ({ AccountDetails, Symbol, UsdValue, LogoutBTN }: Ac
                                 <p className='font-medium text-md dark:text-white ligth:text-gray-500'>{formattedAddress}</p> {/* Apply formatted address */}
                             </div>
                             <div className='flex flex-row gap-2'>
-                                <Copy className='w-6 h-6 dark:text-white ligth:text-gray-500 cursor-pointer' onClick={() => navigator.clipboard.writeText(address ?? "")} />
+                                <Copy 
+                                    className='w-6 h-6 dark:text-white ligth:text-gray-500 cursor-pointer' 
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(address ?? "") 
+                                        toast.success("Address copied to clipboard")
+                                    }}
+                                />
                                 <ExternalLink className='w-6 h-6 dark:text-white ligth:text-gray-500 cursor-pointer' onClick={() => window.open(`https://etherscan.io/address/${address}`, '_blank')} />
                             </div>
                         </div>

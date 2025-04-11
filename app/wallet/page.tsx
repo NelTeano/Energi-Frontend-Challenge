@@ -1,6 +1,7 @@
 'use client'
 import { useState, useCallback, useEffect } from "react";
 import { ethers } from "ethers";
+import { toast } from "sonner"
 
 
 
@@ -37,6 +38,16 @@ interface CryptoDetailsType {
     taker_fee: number;
 }
 
+interface NetworkType {
+    name: string;
+    chainId: number;
+    nativeCurrency: {
+      name: string;
+      symbol: string;
+      decimals: number;
+    };
+}
+
 
 export default function Page() {
   
@@ -49,8 +60,8 @@ export default function Page() {
         maker_fee: 0,
         taker_fee: 0,
     });
-    const [NetworkInfo, setNetworkInfo] = useState<any>(null);
-    const [filteredNetwork, setFilteredNetwork] = useState<any>(null);
+    const [NetworkInfo, setNetworkInfo] = useState<NetworkType[] | null>(null);
+    const [filteredNetwork, setFilteredNetwork] = useState<NetworkType[] | null>(null);
     const [filteredCrypto, setFilteredCrypto] = useState<CryptoDetailsType>({
         name: "",
         symbol: "",
@@ -107,6 +118,7 @@ export default function Page() {
                     chainId: network.chainId.toString(),
                     network: network.name,
                 });
+                toast.success(`MetaMask Currency Changed to ${ network.name.charAt(0).toUpperCase() + network.name.slice(1)} successfully!`)
             };
             
             ethereum.on('chainChanged', handleChainChanged);
@@ -144,6 +156,7 @@ export default function Page() {
 
 
     const _connectToMetaMask = useCallback(async () => {
+        toast("Connecting to MetaMask...")
         const ethereum = window.ethereum;
         // Check if MetaMask is installed
         if (typeof ethereum !== "undefined") {
@@ -169,6 +182,8 @@ export default function Page() {
               chainId: network.chainId.toString(),
               network: network.name,
             });
+
+            toast.success("Connected to MetaMask successfully!")
           
           } catch (error: Error | any) {
             alert(`Error connecting to MetaMask: ${error?.message ?? error}`);
@@ -189,8 +204,8 @@ export default function Page() {
             maker_fee: 0,
             taker_fee: 0,
         });
-    
-        console.log("Wallet disconnected");
+
+        toast.success("MetaMask Wallet disconnected successfully!")
     }, []);
   
     console.log("Account Data:", accountData);

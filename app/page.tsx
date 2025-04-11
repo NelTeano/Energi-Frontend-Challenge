@@ -41,10 +41,22 @@ interface CryptoDetailsType {
   taker_fee: number;
 }
 
+const coinSymbols = [
+  "BTC",  // Bitcoin
+  "ETH",  // Ethereum
+  "USDC", // USD Coin
+  "BNB",  // BNB
+  "XRP",  // XRP
+  "ADA",  // Cardano
+  "SOL",  // Solana
+  "DOGE", // Dogecoin
+  "FTM",  // Fantom
+  "LINK"  // Chainlink
+];
+
 export default function Page() {
 
   const [data, setData] = useState<CryptoCurrencies[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
   const [isNameAscending, setIsNameAscending] = useState<boolean>(false);
   const [isPriceAscending, setIsPriceAscending] = useState<boolean>(false);
   const [CryptoDetails, setCryptoDetails] = useState<CryptoDetailsType>({
@@ -74,7 +86,7 @@ export default function Page() {
 
   useEffect(() => {
     const FilterCurrencies = async () => {  
-      const filtered = Object.values(CryptoDetails).filter((crypto: any) =>
+      const filtered = Object.values(CryptoDetails).filter((crypto: CryptoDetailsType) =>
         coinSymbols.includes(crypto.symbol)
       );
   
@@ -126,18 +138,6 @@ export default function Page() {
     setIsPriceAscending(!isPriceAscending); // Toggle the sort order
   }, [data, isPriceAscending]);
 
-  const coinSymbols = [
-    "BTC",  // Bitcoin
-    "ETH",  // Ethereum
-    "USDC", // USD Coin
-    "BNB",  // BNB
-    "XRP",  // XRP
-    "ADA",  // Cardano
-    "SOL",  // Solana
-    "DOGE", // Dogecoin
-    "FTM",  // Fantom
-    "LINK"  // Chainlink
-  ];
 
   console.log("Currency Details: ", CryptoDetails);
   console.log("Filtered Currencies: ", data);

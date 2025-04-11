@@ -18,6 +18,7 @@ import Loader from "@/components/Loader";
 
 declare global {
   interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ethereum?: any;
   }
 }
@@ -133,7 +134,10 @@ export default function Page() {
     useEffect(() => {
         if (NetworkInfo) {
             const chainId = parseInt(accountData.chainId ?? "0");
-            const networkInfo = NetworkInfo.find((info: any) => info.chainId === chainId);
+            
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+const networkInfo = NetworkInfo.find((info: any) => info.chainId === chainId);
+
             if (networkInfo) {
                 setSymbol(networkInfo.nativeCurrency.symbol);
             }
@@ -144,15 +148,15 @@ export default function Page() {
         
         if(Symbol !== "Default") {
             const filteredEntry = Object.entries(CryptoDetails).find(
-                ([_, value]) => value.symbol === Symbol
-            );
+                ([, value]) => value.symbol === Symbol // Replace `_` with `,`
+              );
         
             if(filteredEntry) {
                 setFilteredCrypto(filteredEntry[1]);
             }
         }
 
-    }, [accountData, Symbol]);
+    }, [accountData, Symbol, CryptoDetails, NetworkInfo]);
 
 
     const _connectToMetaMask = useCallback(async () => {
@@ -184,7 +188,7 @@ export default function Page() {
             });
 
             toast.success("Connected to MetaMask successfully!")
-          
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } catch (error: Error | any) {
             alert(`Error connecting to MetaMask: ${error?.message ?? error}`);
           }

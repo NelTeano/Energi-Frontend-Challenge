@@ -30,7 +30,7 @@ export default function CryptoIcon({ symbol, size = 32 }: CryptoIconProps) {
         } else {
           setImgSrc('/icons/default.svg'); // Fallback image
         }
-      } catch (error) {
+      } catch {
         setImgSrc('/icons/default.svg'); // Fallback image
       } finally {
         setLoading(false);

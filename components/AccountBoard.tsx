@@ -4,7 +4,7 @@ import CryptoIcon from '@/components/CryptoIcon';
 import { Separator } from "@/components/ui/separator";
 import { ExternalLink, Copy } from "lucide-react";
 
-import { toast, Toaster } from 'sonner';
+import { toast } from 'sonner';
 // IMG
 import EnergiIcon from '@/public/energiIcon.png';
 import MetaMaskLogo from '@/public/metamask-icon.png'
@@ -30,7 +30,7 @@ interface AccountType {
 
 export const AccountBoard = ({ AccountDetails, Symbol, UsdValue, LogoutBTN }: AccountBoardProps) => { 
 
-    const { address, balance, chainId, network } = AccountDetails;
+    const { address, balance } = AccountDetails;
 
     const getUsdBalance = useMemo(() => {
         const totalBalance = parseFloat(balance || "0") * UsdValue;

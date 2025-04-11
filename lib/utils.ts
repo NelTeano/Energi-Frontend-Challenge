@@ -6,14 +6,24 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+interface Chain {
+  chainId: number;
+  name: string;
+  nativeCurrency: {
+    name: string;
+    symbol: string;
+    decimals: number;
+  };
+}
+
 
 // Network info fetching function from Chainlist API
 async function fetchNetworkInfo(chainId: number) {
   const response = await fetch(`https://chainid.network/chains.json`);
-  const chains = await response.json();
+  const chains: Chain[] = await response.json();
 
   // Find network by chain ID
-  const network = chains.find((chain: any) => chain.chainId === chainId);
+  const network = chains.find((chain) => chain.chainId === chainId);
 
   if (!network) {
     throw new Error("Network not found!");
@@ -23,6 +33,8 @@ async function fetchNetworkInfo(chainId: number) {
 }
 
 export function useNetworkInfo(chainId: number) {
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [networkInfo, setNetworkInfo] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
@@ -32,8 +44,12 @@ export function useNetworkInfo(chainId: number) {
       try {
         const info = await fetchNetworkInfo(chainId);
         setNetworkInfo(info);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+          if (err instanceof Error) {
+            setError(err.message);
+          } else {
+            setError("An unknown error occurred");
+          }
       } finally {
         setLoading(false);
       }

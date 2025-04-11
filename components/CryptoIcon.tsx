@@ -9,26 +9,32 @@ type CryptoIconProps = {
 };
 
 export default function CryptoIcon({ symbol, size = 32 }: CryptoIconProps) {
-  const [imgSrc, setImgSrc] = useState<string>('');
+  const [imgSrc, setImgSrc] = useState<string>('/icons/default.svg'); // Default fallback image
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchImage = async () => {
+      if (!symbol || symbol === "Default") {
+        // If symbol is invalid, use the fallback image
+        setImgSrc('/icons/default.svg');
+        setLoading(false);
+        return;
+      }
+
       try {
         const iconPath = `/icons/${symbol.toUpperCase()}.svg`;
-        // Simulating a check for image availability
         const response = await fetch(iconPath);
-        
+
         if (response.ok) {
           setImgSrc(iconPath);
         } else {
-          setImgSrc('/icons/default.svg'); // fallback image
+          setImgSrc('/icons/default.svg'); // Fallback image
         }
-        } catch (error) {
-          setImgSrc('/icons/default.svg'); // fallback image
-        } finally {
-          setLoading(false);
-        }
+      } catch (error) {
+        setImgSrc('/icons/default.svg'); // Fallback image
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchImage();

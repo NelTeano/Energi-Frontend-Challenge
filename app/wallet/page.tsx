@@ -1,15 +1,19 @@
 'use client'
-
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { ethers } from "ethers";
+
+
+
 
 // COMPONENTS
 import { Button } from "@/components/ui/button";
-import AccountDetails from "@/components/AccountDetails";
 import Image from 'next/image'
+import { AccountBoard } from "@/components/AccountBoard";
 
 // IMAGE
 import MetaMaskLogo from '@/public/metamask-icon.png'
+import Loader from "@/components/Loader";
+
 
 declare global {
   interface Window {
@@ -18,17 +22,127 @@ declare global {
 }
 
 
-export interface AccountType {
+interface AccountType {
     address?: string;
     balance?: string;
     chainId?: string;
     network?: string;
 }
 
-export default function page() {
+interface CryptoDetailsType { 
+    name: string;
+    symbol: string;
+    last_price: number;
+    maker_fee: number;
+    taker_fee: number;
+}
 
+
+export default function Page() {
+  
     const [accountData, setAccountData] = useState<AccountType>({});
+    const [Symbol, setSymbol] = useState<string>("Default");
+    const [CryptoDetails, setCryptoDetails] = useState<CryptoDetailsType>({
+        name: "",
+        symbol: "",
+        last_price: 0,
+        maker_fee: 0,
+        taker_fee: 0,
+    });
+    const [NetworkInfo, setNetworkInfo] = useState<any>(null);
+    const [filteredNetwork, setFilteredNetwork] = useState<any>(null);
+    const [filteredCrypto, setFilteredCrypto] = useState<CryptoDetailsType>({
+        name: "",
+        symbol: "",
+        last_price: 0,
+        maker_fee: 0,
+        taker_fee: 0,
+    });
     
+    useEffect(() => { 
+
+        const fetchEnergiAPI = async () => {
+            try {
+                const response = await fetch("https://api.energiswap.exchange/v1/assets");
+                const data = await response.json();
+                setCryptoDetails(data);
+            } catch (error) {
+                console.error("Error fetching crypto details:", error);
+            }
+        };
+
+        const fetchNetworkInfo = async () => {
+            const response = await fetch(`https://chainid.network/chains.json`);
+            const chains = await response.json();
+            
+            setNetworkInfo(chains);
+        }
+        
+        fetchNetworkInfo();
+        fetchEnergiAPI();
+    }, [])
+
+
+    useEffect(() => {
+        if (typeof window.ethereum !== 'undefined') {
+            const { ethereum } = window;
+      
+            const handleChainChanged = async () => {
+                const accounts = await ethereum.request({
+                    method: "eth_requestAccounts",
+                });
+                // Get the connected Ethereum address
+                const address = accounts[0];
+                // Create an ethers.js provider using the injected provider from MetaMask
+                const provider = new ethers.BrowserProvider(ethereum);
+                // Get the account balance
+                const balance = await provider.getBalance(address);
+                // Get the network ID from MetaMask
+                const network = await provider.getNetwork();
+
+                setAccountData({
+                    address,
+                    balance: ethers.formatEther(balance),
+                    // The chainId property is a bigint, change to a string
+                    chainId: network.chainId.toString(),
+                    network: network.name,
+                });
+            };
+            
+            ethereum.on('chainChanged', handleChainChanged);
+      
+          return () => {
+            ethereum.removeListener('chainChanged', handleChainChanged);
+          };
+        }
+      }, [accountData]);
+    
+    
+    useEffect(() => {
+        if (NetworkInfo) {
+            const chainId = parseInt(accountData.chainId ?? "0");
+            const networkInfo = NetworkInfo.find((info: any) => info.chainId === chainId);
+            if (networkInfo) {
+                setSymbol(networkInfo.nativeCurrency.symbol);
+            }
+            const filtered = NetworkInfo.filter((info) => info.chainId === chainId); 
+            setFilteredNetwork(filtered); 
+        }
+        
+        
+        if(Symbol !== "Default") {
+            const filteredEntry = Object.entries(CryptoDetails).find(
+                ([_, value]) => value.symbol === Symbol
+            );
+        
+            if(filteredEntry) {
+                setFilteredCrypto(filteredEntry[1]);
+            }
+        }
+
+    }, [accountData, Symbol]);
+
+
     const _connectToMetaMask = useCallback(async () => {
         const ethereum = window.ethereum;
         // Check if MetaMask is installed
@@ -55,6 +169,7 @@ export default function page() {
               chainId: network.chainId.toString(),
               network: network.name,
             });
+          
           } catch (error: Error | any) {
             alert(`Error connecting to MetaMask: ${error?.message ?? error}`);
           }
@@ -62,37 +177,84 @@ export default function page() {
           alert("MetaMask not installed");
         }
     }, []);
+  
+    const _disconnectWallet = useCallback(() => {
+        setAccountData({});
+        setSymbol("Default");
+        setFilteredNetwork(null);
+        setFilteredCrypto({
+            name: "",
+            symbol: "",
+            last_price: 0,
+            maker_fee: 0,
+            taker_fee: 0,
+        });
+    
+        console.log("Wallet disconnected");
+    }, []);
+  
+    console.log("Account Data:", accountData);
+    console.log("Crypto Details:", CryptoDetails);
+    console.log("Symbol:", Symbol);
+    console.log("Network Info:", NetworkInfo);
+    console.log("Filtered Network:", filteredNetwork);
+    console.log("Filtered Crypto:", filteredCrypto);
 
 
-    if(accountData == null || accountData == undefined || Object.keys(accountData).length === 0){
-        console.log("No Account Data Found")
-    }else{
-        console.log("Account Data:", accountData);
+    if (
+        !NetworkInfo || 
+        Object.keys(NetworkInfo).length === 0 || 
+        !CryptoDetails || 
+        Object.keys(CryptoDetails).every(key => 
+            CryptoDetails[key as keyof CryptoDetailsType] === "" || 
+            CryptoDetails[key as keyof CryptoDetailsType] === 0
+        )
+    ) {
+        return (
+              <div className='flex justify-center w-full h-screen'>
+                <Loader />
+              </div>
+        )
     }
-      
-  return (
-    <div className="flex flex-col w-full h-screen">
-        { accountData == null || accountData == undefined || Object.keys(accountData).length === 0? 
-            <div
-                className="flex flex-col gap-4 items-center justify-center h-[600px] bg-amber-100 w-full"
-            >
-                <Image
-                    src={MetaMaskLogo}
-                    width={200}
-                    height={200}
-                    alt="Metamask Logo"
-                />
-                <Button onClick={_connectToMetaMask} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200 ease-in-out">
-                    Connect to MetaMask
-                </Button>
-            </div>
-        : 
-        <>
-            <div className="flex flex-col items-center justify-center w-full h-screen">
-                <AccountDetails AccountData={accountData} setAccountData={setAccountData} />
-            </div>
-        </>
-        }
-    </div>
-  )
+
+    
+
+        return (
+            <>
+                { accountData == null || accountData == undefined || Object.keys(accountData).length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-screen dark:bg-black light:bg-white">
+                        <div className="flex flex-col w-full h-screen">
+                                <div
+                                    className="flex flex-col gap-4 items-center justify-center h-[600px] w-full"
+                                >
+                                    <div className="flex flex-col items-center justify-center ">
+                                        <Image
+                                            src={MetaMaskLogo}
+                                            width={200}
+                                            height={200}
+                                            alt="Metamask Logo"
+                                        />
+                                        <div className="flex flex-row gap-2 mt-4">
+                                            {["M", "E", "T", "A", "M", "A", "S", "K"].map((letter, index) => (
+                                                <span key={index} className="text-5xl font-bold dark:text-white light:text-gray-500">{letter}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <Button onClick={_connectToMetaMask} className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-800 hover:cursor-pointer transition duration-200 ease-in-out">
+                                        Connect to MetaMask
+                                    </Button>
+                                </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center justify-center w-full h-screen">
+                        <AccountBoard Symbol={Symbol} AccountDetails={accountData} UsdValue={filteredCrypto.last_price} LogoutBTN={_disconnectWallet} />
+                    </div>
+                )}
+            </>
+        )
 }
+
+
+
+

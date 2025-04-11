@@ -18,7 +18,7 @@ export function ModeToggle() {
   return (
     <div className="fixed right-4 bottom-4 z-50 flex items-center justify-center">
         <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger asChild  className="hover:cursor-pointer">
             <Button variant="outline" size="icon">
             <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
@@ -26,10 +26,10 @@ export function ModeToggle() {
             </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setTheme("light")}>
+            <DropdownMenuItem className="hover:cursor-pointer" onClick={() => setTheme("light")}>
             Light
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("dark")}>
+            <DropdownMenuItem className="hover:cursor-pointer" onClick={() => setTheme("dark")}>
             Dark
             </DropdownMenuItem>
         </DropdownMenuContent>

@@ -51,10 +51,10 @@ export const formatCurrency = (balance: string) => {
     return numBalance.toFixed(4); 
 }
 
-export const formatUSD = (balance: string) => { 
+export const formatUSD = (balance: string, decimalDigits: number) => { 
     const numBalance = parseFloat(balance);
     if (isNaN(numBalance)) return balance;
-    return numBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+    return numBalance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: decimalDigits });
 }
 
 export const formatAddress = (address: string) => {
